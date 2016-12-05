@@ -40,7 +40,11 @@ public class TwoFourTree
      * @param key to be searched for
      * @return object corresponding to key; null if not found
      */
+    @Override
     public Object findElement(Object key) {
+        
+        
+        
         return null;
     }
 
@@ -49,8 +53,9 @@ public class TwoFourTree
      * @param key of object to be inserted
      * @param element to be inserted
      */
+    @Override
     public void insertElement(Object key, Object element) {
-        //creates new item based on input
+    	//creates new item based on input
         Item newItem = new Item (key, element);
         //adds a node to insert the item into if the tree doesn't have nodes yet
         if (isEmpty()) {
@@ -92,6 +97,7 @@ public class TwoFourTree
      * @return object corresponding to key
      * @exception ElementNotFoundException if the key is not in dictionary
      */
+    @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
         if (findElement(key) == null) {
             throw new ElementNotFoundException ("No such element exists.");
@@ -101,6 +107,57 @@ public class TwoFourTree
         }
         return null;
     }
+    
+    /**
+     * Find First Greater Than or Equal
+     * 
+     * @author Michael Hayes
+     * This method is used in the search routine and is used to search the node
+     * for where the key should go. Called for a node to see if the key is in a given node
+     * @param node the node to search
+     * @param key the item to search for in given node 
+     * @return index in the array relating to the first greater than or equal
+     */
+    protected int findFirstGreaterThanOrEqual(TFNode node, Object key){
+        
+        int numOfItems = node.getNumItems();
+        //set the return value to the last slot because if we don't find
+        //a first greater than or equal we know we need to put it at the end
+        int returnVal = numOfItems;
+        
+        for(int i = 0; i < numOfItems; i++){
+            //if the current element's key is greater than or equal to the search key 
+            if(treeComp.isGreaterThanOrEqualTo(node.getItem(i).key(), key)){
+                //return the index
+                returnVal = i;
+            }
+        }       
+        return returnVal;
+    }
+    
+    /**
+     * What Child is This
+     * 
+     * @author Michael Hayes
+     * This method takes in a child node and returns which child (i.e. 0, 1, 2...)
+     * of the parent it is
+     * @param child the node to determine what child it is
+     * @return the array index for what child is this
+     */
+    protected int whatChildIsThis(TFNode child){
+        
+        TFNode parent = child.getParent();
+        
+        //since there is always one more child than num of items
+        int numOfChildren = parent.getNumItems() + 1;
+        
+        for(int i = 0; i < numOfChildren; i++){
+            //CURRENTLY IN PROGRESS
+        }
+        
+        return 0;
+    }
+    
 
     public static void main(String[] args) {
         Comparator myComp = new IntegerComparator();
