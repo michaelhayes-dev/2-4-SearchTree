@@ -50,6 +50,39 @@ public class TwoFourTree
      * @param element to be inserted
      */
     public void insertElement(Object key, Object element) {
+        //creates new item based on input
+        Item newItem = new Item (key, element);
+        //adds a node to insert the item into if the tree doesn't have nodes yet
+        if (isEmpty()) {
+            treeRoot = new TFNode();
+            treeRoot.insertItem(0, newItem);   
+        }
+        else {
+            TFNode node; 
+            //find proper location to insert item
+            node = (TFNode) findElement(key);
+            if (node != null) {
+                int index = 0;
+                //finds index to place in node
+                while (treeComp.isLessThan(key, node.getItem(index).key())) {
+                    index++;
+                }
+                
+                if (index > 3) {
+                    //add a child node and insert child
+                    node.insertItem(index, newItem);
+                }
+                else if (node.getNumItems() > 2) {
+                    //fix tree when you boot out an item
+                    node.insertItem(index, newItem);
+                }
+                
+                
+            }
+        }
+        
+        
+        size++;
     }
 
     /**
@@ -60,6 +93,12 @@ public class TwoFourTree
      * @exception ElementNotFoundException if the key is not in dictionary
      */
     public Object removeElement(Object key) throws ElementNotFoundException {
+        if (findElement(key) == null) {
+            throw new ElementNotFoundException ("No such element exists.");
+        }
+        else {
+            //remove the item
+        }
         return null;
     }
 
