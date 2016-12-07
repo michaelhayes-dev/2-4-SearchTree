@@ -43,7 +43,16 @@ public class TwoFourTree
     @Override
     public Object findElement(Object key) {
         
-        
+        //ALGORITHM
+        //start at root
+        //----
+        //FindFirstGreaterThanOrEqual
+        //Is the key at this arrayIndex the key I'm looking for?
+        //if so, then return we're done
+        //if not, recursively go down the child pointer of the arrayIndex we found
+        //----
+        //return the element
+        //return null if unsuccessful
         
         return null;
     }
@@ -88,6 +97,9 @@ public class TwoFourTree
         
         
         size++;
+        
+        //Always check to make sure all pointers are hooked up correctly
+        checkTree();
     }
 
     /**
@@ -104,7 +116,28 @@ public class TwoFourTree
         }
         else {
             //remove the item
+            
+            //ALGORITHM
+            //find node to delete
+            //am i a leaf?
+            //if so remove item from the leaf and check underflow
+            //if not, replace me with inorder successor
+            //perform a shifting delete to remove inorder successor
+            //check if underflow
         }
+        
+        //Always check to make sure all pointers are hooked up correctly
+        checkTree();
+        
+        return null;
+    }
+    
+    /**
+     * 
+     * @param node the node to find the inorderSucessor for
+     * @return the inorderSuccessor node, if one exists
+     */
+    protected TFNode inorderSuccessor(TFNode node){
         return null;
     }
     
@@ -146,18 +179,122 @@ public class TwoFourTree
      */
     protected int whatChildIsThis(TFNode child){
         
-        TFNode parent = child.getParent();
+        if(child != root()){
+            TFNode parent = child.getParent();
         
-        //since there is always one more child than num of items
-        int numOfChildren = parent.getNumItems() + 1;
-        
-        for(int i = 0; i < numOfChildren; i++){
-            //CURRENTLY IN PROGRESS
+            //since there is always one more child than num of items
+            int numOfChildren = parent.getNumItems() + 1;
+
+            for(int i = 0; i < numOfChildren; i++){
+                if(child == parent.getChild(i)){
+                    return i;
+                }
+            }
+        }
+        else{
+            //TODO:
+            //special case for root
         }
         
         return 0;
     }
+       
+    /**
+     * 
+     * @param node the node that is fixed from overflow
+     */
+    protected void overflow(TFNode node){
+        
+        //ALGORITHM
+        //take out item 2
+        //make new node
+        //put item 3 in new node
+        //hook up new node
+        //put item 2 in parent
+        //hook up kids
+        //check overflow on parent
+        
+        //Don't shift when u remove item from node 
+    }
     
+    /**
+     * Underflow
+     * 
+     * @author Michael Hayes
+     * This method performs the correct underflow fix technique once a node
+     * has underflowed. This method should be called after checking to see
+     * if a node has underflowed as this is only the fix up method.
+     * @param node the node that is fixed from underflow
+     */
+    protected void underflow(TFNode node){
+        
+        if(node != root()){
+           //siblings of the node
+           TFNode leftSib = null;
+           TFNode rightSib = null;
+           
+           //NOTE: we already know that because 'node' isn't the root, getParent() won't return null
+           int wcit = whatChildIsThis(node);
+           if(wcit > 0){
+               //if we are not the furthest left sibling then give us our left sibling
+               leftSib = node.getParent().getChild(wcit - 1); 
+           }
+           if(wcit < node.getParent().getNumItems() + 1){
+               //if we are not the furthest right sibling then give us our right sibling
+               rightSib = node.getParent().getChild(wcit + 1); 
+           }
+           
+           //perform the underflow checks
+           if((leftSib != null) && (leftSib.getNumItems() == 2)){
+               leftTransfer(node);
+           }
+           else if((rightSib != null) && (rightSib.getNumItems() == 2)){
+               rightTransfer(node);
+           }
+           else if(leftSib != null){
+               leftFusion(node);
+           }
+           else {
+               rightFusion(node);
+           }
+        }
+        else{
+            //TODO:
+            //Special case for underflow at root
+        }    
+    }
+    
+    /**
+     * 
+     * @param node the node that the left transfer is performed on
+     */
+    protected void leftTransfer(TFNode node){
+        
+    }
+    
+    /**
+     * 
+     * @param node the node that the right transfer is performed on
+     */
+    protected void rightTransfer(TFNode node){
+        
+    }
+    
+    /**
+     * 
+     * @param node the node that the left fusion is performed on
+     */
+    protected void leftFusion(TFNode node){
+        
+    }
+    
+    /**
+     * 
+     * @param node the node that the right fusion is performed on
+     */
+    protected void rightFusion(TFNode node){
+        
+    }
 
     public static void main(String[] args) {
         Comparator myComp = new IntegerComparator();
