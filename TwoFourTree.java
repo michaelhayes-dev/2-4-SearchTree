@@ -43,17 +43,27 @@ public class TwoFourTree
     @Override
     public Object findElement(Object key) {
         
-        //ALGORITHM
-        //start at root
-        //----
-        //FindFirstGreaterThanOrEqual
-        //Is the key at this arrayIndex the key I'm looking for?
-        //if so, then return we're done
-        //if not, recursively go down the child pointer of the arrayIndex we found
-        //----
-        //return the element
+        //holds the return data of FFGTE
+        int indexElement;
+        TFNode node;
+        //start at root node
+        node = root();
+      
+         //FindFirstGreaterThanOrEqual
+        while (node != null) {
+            //assigns value from FFGTE
+            indexElement = findFirstGreaterThanOrEqual(node, key);
+            //checks to see if it is the correct value
+            if (node.getItem(indexElement).key() == key) {
+                return (node.getItem(indexElement));
+            } 
+            else {
+                //reassign node to child
+                node = node.getChild(indexElement);
+            }
+          
+        }
         //return null if unsuccessful
-        
         return null;
     }
 
@@ -86,7 +96,7 @@ public class TwoFourTree
                     //add a child node and insert child
                     node.insertItem(index, newItem);
                 }
-                else if (node.getNumItems() > 2) {
+                else if (node.getNumItems() == 3) {
                     //fix tree when you boot out an item
                     node.insertItem(index, newItem);
                 }
@@ -129,6 +139,8 @@ public class TwoFourTree
         //Always check to make sure all pointers are hooked up correctly
         checkTree();
         
+        size--;
+        
         return null;
     }
     
@@ -156,7 +168,7 @@ public class TwoFourTree
         int numOfItems = node.getNumItems();
         //set the return value to the last slot because if we don't find
         //a first greater than or equal we know we need to put it at the end
-        int returnVal = numOfItems;
+        int returnVal = numOfItems - 1;
         
         for(int i = 0; i < numOfItems; i++){
             //if the current element's key is greater than or equal to the search key 
