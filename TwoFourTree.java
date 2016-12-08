@@ -64,6 +64,11 @@ public class TwoFourTree
         return null;
     }
     
+    /**
+     * Searches for the node where our desired key lives.
+     * @param key the key we are looking for
+     * @return node with the proper key
+     */
     protected TFNode search(Object key){
         //holds the return data of FFGTE
         int indexElement;
@@ -105,24 +110,17 @@ public class TwoFourTree
         else {
             TFNode node; 
             //find proper location to insert item
-            node = (TFNode) findElement(key);
+            node = search(key);
             if (node != null) {
                 int index = 0;
                 //finds index to place in node
                 while (treeComp.isLessThan(key, node.getItem(index).key())) {
                     index++;
                 }
-                
-                if (index > 3) {
-                    //add a child node and insert child
-                    node.insertItem(index, newItem);
+                if (node.getNumItems() > node.getMaxItems()) {
+                    overflow(node);
                 }
-                else if (node.getNumItems() == 3) {
-                    //fix tree when you boot out an item
-                    node.insertItem(index, newItem);
-                }
-                
-                
+                node.insertItem(index, newItem);  
             }
         }
         
@@ -142,12 +140,34 @@ public class TwoFourTree
      */
     @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
-        if (findElement(key) == null) {
+        TFNode node = search(key);
+        Item out;
+        
+        if (node == null) {
             throw new ElementNotFoundException ("No such element exists.");
         }
         else {
             //remove the item
             
+            //find proper location to insert item
+            int index = 0;
+            //finds index to place in node
+            while (treeComp.isLessThan(key, node.getItem(index).key())) {
+                index++;
+            }
+            if (node.getNumItems() == 1) {
+                underflow(node);
+            }
+            
+            out = node.removeItem(index);
+            
+            size--;
+            
+            //Always check to make sure all pointers are hooked up correctly
+            checkTree();
+            
+            return (out);
+                
             //ALGORITHM
             //find node to delete
             //am i a leaf?
@@ -156,13 +176,7 @@ public class TwoFourTree
             //perform a shifting delete to remove inorder successor
             //check if underflow
         }
-        
-        //Always check to make sure all pointers are hooked up correctly
-        checkTree();
-        
-        size--;
-        
-        return null;
+
     }
     
     /**
