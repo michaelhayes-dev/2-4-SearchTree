@@ -168,7 +168,7 @@ public class TwoFourTree
         int numOfItems = node.getNumItems();
         //set the return value to the last slot because if we don't find
         //a first greater than or equal we know we need to put it at the end
-        int returnVal = numOfItems - 1;
+        int returnVal = numOfItems;
         
         for(int i = 0; i < numOfItems; i++){
             //if the current element's key is greater than or equal to the search key 
