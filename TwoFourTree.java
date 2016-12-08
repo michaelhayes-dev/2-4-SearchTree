@@ -45,9 +45,7 @@ public class TwoFourTree
         
         //holds the return data of FFGTE
         int indexElement;
-        TFNode node;
-        //start at root node
-        node = root();
+        TFNode node = search(key);
       
          //FindFirstGreaterThanOrEqual
         while (node != null) {
@@ -60,8 +58,31 @@ public class TwoFourTree
             else {
                 //reassign node to child
                 node = node.getChild(indexElement);
-            }
-          
+            }   
+        }
+        //return null if unsuccessful
+        return null;
+    }
+    
+    protected TFNode search(Object key){
+        //holds the return data of FFGTE
+        int indexElement;
+        TFNode node;
+        //start at root node
+        node = root();
+      
+         //FindFirstGreaterThanOrEqual
+        while (node != null) {
+            //assigns value from FFGTE
+            indexElement = findFirstGreaterThanOrEqual(node, key);
+            //checks to see if it is the correct value
+            if (node.getItem(indexElement).key() == key) {
+                return (node);
+            } 
+            else {
+                //reassign node to child
+                node = node.getChild(indexElement);
+            }   
         }
         //return null if unsuccessful
         return null;
