@@ -200,9 +200,7 @@ public class TwoFourTree
                 checkTree();
                 return (out);
             }
-            
-            
-            
+     
             //ALGORITHM
             //find node to delete
             //am i a leaf?
@@ -297,10 +295,8 @@ public class TwoFourTree
         }
         else {
             //returns -1 if the passed node is the root.
-            return -1;
-            
-        }
-        
+            return -1;            
+        }        
         return 0;
     }
     
@@ -359,6 +355,7 @@ public class TwoFourTree
             node.setChild(3, null);
             node.setChild(4, null);
             
+            //make sure the tree is correct 
             checkTree();
             checkOverflow(parent);
         }
@@ -377,10 +374,43 @@ public class TwoFourTree
             //hook up the children
             newRoot.setChild(0, node);
             newRoot.setChild(1, newChild);
-            
+        }      
+    }
+    
+    /**
+     * Returns the left sibling of a given node
+     * @param node the node to find the left sibling of
+     * @return the left sibling
+     */
+    protected TFNode leftSib(TFNode node){
+        
+        if(node != root()){
+            int wcit = whatChildIsThis(node);
+            if(wcit > 0){
+               //if we are not the furthest left sibling then return our left sibling
+               return node.getParent().getChild(wcit - 1); 
+            }
         }
         
+        return null;       
+    }
+    
+    /**
+     * Returns the right sibling of a given node
+     * @param node the node to find the right sibling of
+     * @return the right sibling
+     */
+    protected TFNode rightSib(TFNode node){
         
+        if(node != root()){
+            int wcit = whatChildIsThis(node);
+            if(wcit < node.getParent().getNumItems() + 1){
+               //if we are not the furthest right sibling then give us our right sibling
+               return node.getParent().getChild(wcit + 1); 
+           }
+        }
+        
+        return null;       
     }
     
     /**
@@ -396,19 +426,9 @@ public class TwoFourTree
         
         if(node != root()){
            //siblings of the node
-           TFNode leftSib = null;
-           TFNode rightSib = null;
            
-           //NOTE: we already know that because 'node' isn't the root, getParent() won't return null
-           int wcit = whatChildIsThis(node);
-           if(wcit > 0){
-               //if we are not the furthest left sibling then give us our left sibling
-               leftSib = node.getParent().getChild(wcit - 1); 
-           }
-           if(wcit < node.getParent().getNumItems() + 1){
-               //if we are not the furthest right sibling then give us our right sibling
-               rightSib = node.getParent().getChild(wcit + 1); 
-           }
+           TFNode leftSib = leftSib(node);
+           TFNode rightSib = rightSib(node);
            
            //perform the underflow checks
            if((leftSib != null) && (leftSib.getNumItems() == 2)){
@@ -427,7 +447,7 @@ public class TwoFourTree
         else{
             //TODO:
             //Special case for underflow at root
-        }    
+        } 
     }
     
     /**
@@ -435,7 +455,19 @@ public class TwoFourTree
      * @param node the node that the left transfer is performed on
      */
     protected void leftTransfer(TFNode node){
+        TFNode leftSib = leftSib(node);
+        TFNode parent = node.getParent();
         
+        //move parent item down
+        node.insertItem(0, parent.deleteItem(whatChildIsThis(leftSib)));
+        //move left sib item up
+        parent.insertItem(whatChildIsThis(leftSib), leftSib.deleteItem(1));
+        
+        //hook up children
+        node.setChild(0, leftSib.getChild(2));
+        leftSib.setChild(2, null);
+        
+        checkTree();
     }
     
     /**
@@ -443,7 +475,21 @@ public class TwoFourTree
      * @param node the node that the right transfer is performed on
      */
     protected void rightTransfer(TFNode node){
+        TFNode rightSib = rightSib(node);
+        TFNode parent = node.getParent();
         
+        //move parent item down
+        node.insertItem(0, parent.deleteItem(whatChildIsThis(rightSib)-1));
+        //move right sib item up
+        //CHECK THIS****
+        parent.insertItem(whatChildIsThis(rightSib)-1, rightSib.deleteItem(0));
+        
+        //hook up children
+        //CHECK THIS****
+        node.setChild(0, rightSib.getChild(0));
+        rightSib.setChild(0, null);
+        
+        checkTree();
     }
     
     /**
