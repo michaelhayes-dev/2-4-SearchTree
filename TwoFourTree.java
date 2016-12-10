@@ -100,7 +100,9 @@ public class TwoFourTree
         //adds a node to insert the item into if the tree doesn't have nodes yet
         if (isEmpty()) {
             treeRoot = new TFNode();
-            treeRoot.insertItem(0, newItem);   
+            treeRoot.insertItem(0, newItem);
+            treeRoot.setChild(0, null);
+            treeRoot.setParent(null);
         }
         else {
             TFNode node; 
@@ -112,17 +114,10 @@ public class TwoFourTree
                 while (treeComp.isLessThan(key, node.getItem(index).key())) {
                     index++;
                 }
-                
-                if (index > 3) {
-                    //add a child node and insert child
-                    node.insertItem(index, newItem);
-                    checkOverflow(node);
-                }
-                else if (node.getNumItems() == 3) {
-                    //fix tree when you boot out an item
-                    node.insertItem(index, newItem);
-                    checkOverflow(node);
-                }   
+                //add a child node and insert child
+                node.insertItem(index, newItem);
+                node.setChild(index, null);
+                checkOverflow(node);  
             }
         }
         
@@ -172,6 +167,7 @@ public class TwoFourTree
                 out = node.removeItem(index);
                 checkUnderflow(node);
                 size--;
+                checkTree();
                 
                 //Always check to make sure all pointers are hooked up correctly
                 checkTree();
@@ -200,6 +196,7 @@ public class TwoFourTree
                 checkTree();
                 return (out);
             }
+
      
             //ALGORITHM
             //find node to delete
@@ -208,6 +205,7 @@ public class TwoFourTree
             //if not, replace me with inorder successor
             //perform a shifting delete to remove inorder successor
             //check if underflow
+
         }
     }
     
@@ -239,7 +237,6 @@ public class TwoFourTree
             }
             returnNode = returnNode.getChild(0);
         }
-        
         return returnNode.getItem(0);
     }
     
@@ -295,8 +292,10 @@ public class TwoFourTree
         }
         else {
             //returns -1 if the passed node is the root.
+
             return -1;            
         }        
+
         return 0;
     }
     
@@ -497,7 +496,14 @@ public class TwoFourTree
      * @param node the node that the left fusion is performed on
      */
     protected void leftFusion(TFNode node){
-        
+        Item item = node.getItem(0);
+        TFNode child = node.getChild(0);
+        //location in the child where the item goes
+        int location = child.getNumItems();
+        child.insertItem(location - 1 , item);
+        child.setChild(location, null);
+        node.removeItem(0);
+        checkUnderflow(node);
     }
     
     /**
@@ -505,7 +511,16 @@ public class TwoFourTree
      * @param node the node that the right fusion is performed on
      */
     protected void rightFusion(TFNode node){
-        
+        //location of the rightmost item
+        int rightLocation = node.getNumItems();
+        Item item = node.getItem(rightLocation);
+        TFNode child = node.getChild(rightLocation);
+        //location in the child where the item goes
+        int location = child.getNumItems();
+        child.insertItem(location , item);
+        child.setChild(location, null);
+        node.removeItem(rightLocation);
+        checkUnderflow(node);
     }
 
     public static void main(String[] args) {
