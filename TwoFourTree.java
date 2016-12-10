@@ -8,9 +8,8 @@ package termproject;
  * @author
  * @version 1.0
  */
-//
 public class TwoFourTree
-        implements Dictionary {
+    implements Dictionary {
 
     private Comparator treeComp;
     private int size = 0;
@@ -140,11 +139,35 @@ public class TwoFourTree
      */
     @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
+        
+        TFNode node = search(key);
+        Item out;
+         
         if (findElement(key) == null) {
             throw new ElementNotFoundException ("No such element exists.");
         }
         else {
+            
             //remove the item
+             
+            //find proper location to insert item
+            int index = 0;
+            //finds index to place in node
+            while (treeComp.isLessThan(key, node.getItem(index).key())) {
+                index++;
+            }
+            if (node.getNumItems() == 1) {
+                underflow(node);
+            }
+            
+            out = node.removeItem(index);
+            
+            size--;
+            
+            //Always check to make sure all pointers are hooked up correctly
+            checkTree();
+             
+             return (out);
             
             //ALGORITHM
             //find node to delete
@@ -154,13 +177,6 @@ public class TwoFourTree
             //perform a shifting delete to remove inorder successor
             //check if underflow
         }
-        
-        //Always check to make sure all pointers are hooked up correctly
-        checkTree();
-        
-        size--;
-        
-        return null;
     }
     
     /**
