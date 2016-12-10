@@ -64,11 +64,6 @@ public class TwoFourTree
         return null;
     }
     
-    /**
-     * Searches for the node where our desired key lives.
-     * @param key the key we are looking for
-     * @return node with the proper key
-     */
     protected TFNode search(Object key){
         //holds the return data of FFGTE
         int indexElement;
@@ -110,20 +105,24 @@ public class TwoFourTree
         else {
             TFNode node; 
             //find proper location to insert item
-            node = search(key);
+            node = (TFNode) findElement(key);
             if (node != null) {
                 int index = 0;
                 //finds index to place in node
                 while (treeComp.isLessThan(key, node.getItem(index).key())) {
                     index++;
                 }
-                if (node.getNumItems() > node.getMaxItems()) {
-                    overflow(node);
+                
+                if (index > 3) {
+                    //add a child node and insert child
+                    node.insertItem(index, newItem);
                 }
-                node.insertItem(index, newItem);  
+                else if (node.getNumItems() == 3) {
+                    //fix tree when you boot out an item
+                    node.insertItem(index, newItem);
+                }   
             }
         }
-        
         
         size++;
         
@@ -140,34 +139,12 @@ public class TwoFourTree
      */
     @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
-        TFNode node = search(key);
-        Item out;
-        
-        if (node == null) {
+        if (findElement(key) == null) {
             throw new ElementNotFoundException ("No such element exists.");
         }
         else {
             //remove the item
             
-            //find proper location to insert item
-            int index = 0;
-            //finds index to place in node
-            while (treeComp.isLessThan(key, node.getItem(index).key())) {
-                index++;
-            }
-            if (node.getNumItems() == 1) {
-                underflow(node);
-            }
-            
-            out = node.removeItem(index);
-            
-            size--;
-            
-            //Always check to make sure all pointers are hooked up correctly
-            checkTree();
-            
-            return (out);
-                
             //ALGORITHM
             //find node to delete
             //am i a leaf?
@@ -176,16 +153,46 @@ public class TwoFourTree
             //perform a shifting delete to remove inorder successor
             //check if underflow
         }
-
+        
+        //Always check to make sure all pointers are hooked up correctly
+        checkTree();
+        
+        size--;
+        
+        return null;
     }
     
     /**
      * 
      * @param node the node to find the inorderSucessor for
+     * @param itm the item that needs the inorderSucessor
      * @return the inorderSuccessor node, if one exists
      */
-    protected TFNode inorderSuccessor(TFNode node){
-        return null;
+    protected Item inorderSuccessor(TFNode node, Item itm){
+        
+        Item returnItem;
+        int wcit = whatChildIsThis(node);
+        int arrayIndex = 0;
+        
+        //find index that the item is at
+        for(; arrayIndex < node.getNumItems(); arrayIndex++){
+            if(itm == node.getItem(arrayIndex)){
+                break;
+            }
+        }
+        
+        //find the inorder successer node
+        //get the right child
+        TFNode returnNode = node.getChild(arrayIndex+1);
+        //get the furthest left child
+        while(true){
+            if(returnNode.getChild(0) == null){
+                break;
+            }
+            returnNode = returnNode.getChild(0);
+        }
+        
+        return returnNode.getItem(0);
     }
     
     /**
