@@ -188,7 +188,6 @@ public class TwoFourTree
     protected Item inorderSuccessor(TFNode node, Item itm){
         
         Item returnItem;
-        int wcit = whatChildIsThis(node);
         int arrayIndex = 0;
         
         //find index that the item is at
@@ -269,7 +268,29 @@ public class TwoFourTree
         
         return 0;
     }
-       
+    
+    /**
+     * Method that checks to see if a node overflowed
+     * and calls the fix-up routine if so
+     * @param node 
+     */
+    protected void checkOverflow(TFNode node){
+        if(node.getNumItems() > node.getMaxItems()){
+            overflow(node);
+        }
+    }
+    
+    /**
+     * Method that checks to see if a node underflowed
+     * and calls the fix-up routine if so
+     * @param node 
+     */
+    protected void checkUnderflow(TFNode node){
+        if(node.getNumItems() == 0){
+            underflow(node);
+        }
+    }
+    
     /**
      * 
      * @param node the node that is fixed from overflow
@@ -284,8 +305,47 @@ public class TwoFourTree
         //put item 2 in parent
         //hook up kids
         //check overflow on parent
+        //Don't shift when u remove item from node
         
-        //Don't shift when u remove item from node 
+        Item i2 = node.deleteItem(2);
+        Item i3 = node.deleteItem(3);
+        int wcit = whatChildIsThis(node);
+        TFNode newNode = new TFNode();
+        newNode.addItem(0, i3);
+        
+        if(node != root()){
+            TFNode parent = node.getParent();
+            newNode.setParent(parent);
+            parent.insertItem(wcit, i2);
+            
+            //hook up the new children
+            newNode.setChild(0, node.getChild(3));
+            newNode.setChild(1, node.getChild(4));
+            node.setChild(3, null);
+            node.setChild(4, null);
+            
+            checkTree();
+            checkOverflow(parent);
+        }
+        else{
+            //the node that overflows is the root
+            //we will need to grow the root
+            TFNode newRoot = new TFNode();
+            Item newRootItem = node.deleteItem(2);
+            newRoot.insertItem(0, newRootItem);
+            node.setParent(newRoot);
+            setRoot(newRoot);
+            
+            TFNode newChild = new TFNode();
+            newChild.setParent(newRoot);
+            
+            //hook up the children
+            newRoot.setChild(0, node);
+            newRoot.setChild(1, newChild);
+            
+        }
+        
+        
     }
     
     /**
