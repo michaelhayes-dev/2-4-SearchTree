@@ -116,10 +116,12 @@ public class TwoFourTree
                 if (index > 3) {
                     //add a child node and insert child
                     node.insertItem(index, newItem);
+                    checkOverflow(node);
                 }
                 else if (node.getNumItems() == 3) {
                     //fix tree when you boot out an item
                     node.insertItem(index, newItem);
+                    checkOverflow(node);
                 }   
             }
         }
@@ -147,27 +149,59 @@ public class TwoFourTree
             throw new ElementNotFoundException ("No such element exists.");
         }
         else {
+            //vairable that says whether node is a leaf.
+            boolean isLeaf = true;
             
-            //remove the item
-             
             //find proper location to insert item
             int index = 0;
             //finds index to place in node
             while (treeComp.isLessThan(key, node.getItem(index).key())) {
                 index++;
             }
-            if (node.getNumItems() == 1) {
-                underflow(node);
+            
+            //finds our whether node is a leaf and assigns the isLeaf variable
+            for (int i = 0; i < node.getNumItems(); i++) {
+                if (node.getChild(i) != null) {
+                    isLeaf = false;
+                    break;
+                }
             }
             
-            out = node.removeItem(index);
-            
-            size--;
-            
-            //Always check to make sure all pointers are hooked up correctly
-            checkTree();
+            //remove the item, leaf condition
+            if (isLeaf) { 
+                out = node.removeItem(index);
+                checkUnderflow(node);
+                size--;
+                
+                //Always check to make sure all pointers are hooked up correctly
+                checkTree();
              
-             return (out);
+                return (out);
+            }
+            
+            else {
+                //node where the inorder successor lives
+                TFNode inOrder;
+                //index of the inorder successor
+                int inOrderIndex = 0;
+                //assigns item to the inorder successor
+                Item item = inorderSuccessor(node, node.getItem(index));
+                //replaces the item to be removed with inorder successor  
+                out = node.replaceItem(index, item);
+                //finds the location of the inorder successor and removes it.
+                inOrder = search(item.key());
+                while (treeComp.isLessThan(item.key(), inOrder.getItem(inOrderIndex).key())) {
+                    inOrderIndex++;
+                }
+                inOrder.removeItem(inOrderIndex);
+                
+                checkUnderflow(node);
+                size--;
+                checkTree();
+                return (out);
+            }
+            
+            
             
             //ALGORITHM
             //find node to delete
@@ -262,9 +296,10 @@ public class TwoFourTree
                 }
             }
         }
-        else{
-            //TODO:
-            //special case for root
+        else {
+            //returns -1 if the passed node is the root.
+            return -1;
+            
         }
         
         return 0;
