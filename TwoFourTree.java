@@ -52,13 +52,19 @@ public class TwoFourTree
             //assigns value from FFGTE
             indexElement = findFirstGreaterThanOrEqual(node, key);
             //checks to see if it is the correct value
-            if (node.getItem(indexElement).key() == key) {
-                return (node.getItem(indexElement));
-            } 
-            else {
+            
+            if (node.getNumItems() == indexElement) {
                 //reassign node to child
                 node = node.getChild(indexElement);
             }   
+            else if (node.getItem(indexElement).key() == key) {
+                return (node.getItem(indexElement));
+            } 
+            
+            else if (node.getNumItems() > indexElement) {
+                node = node.getChild(indexElement);
+            }
+            
         }
         //return null if unsuccessful
         return null;
@@ -75,14 +81,22 @@ public class TwoFourTree
         while (node != null) {
             //assigns value from FFGTE
             indexElement = findFirstGreaterThanOrEqual(node, key);
-            //checks to see if it is the correct value
-            if (node.getItem(indexElement).key() == key) {
-                return (node);
-            } 
-            else {
+            
+            //moves to next node when key not found in the node
+            if (node.getNumItems() == indexElement) {
                 //reassign node to child
                 node = node.getChild(indexElement);
-            }   
+            } 
+            
+            //checks to see if it is the correct value
+            else if (node.getItem(indexElement).key() == key) {
+                return (node);
+            } 
+            
+            else if (node.getNumItems() > indexElement) {
+                node = node.getChild(indexElement);
+            }
+              
         }
         //return null if unsuccessful
         return null;
