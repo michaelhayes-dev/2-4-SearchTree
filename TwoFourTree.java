@@ -36,6 +36,21 @@ public class TwoFourTree
     }
 
     /**
+     * helper class to make searching MUCH easier
+     */
+    private class nodeIndexPair {
+        private TFNode node;
+        private int index;
+        private boolean exactMatch;
+        
+        void nodeIndexPair(){
+            node = null;
+            index = 0;
+            exactMatch = false;
+        }
+    }
+    
+    /**
      * Searches dictionary to determine if key is present
      * @param key to be searched for
      * @return object corresponding to key; null if not found
@@ -43,62 +58,74 @@ public class TwoFourTree
     @Override
     public Object findElement(Object key) {
         
-        //holds the return data of FFGTE
-        int indexElement;
-        TFNode node = search(key);
-      
-         //FindFirstGreaterThanOrEqual
-        while (node != null) {
-            //assigns value from FFGTE
-            indexElement = findFirstGreaterThanOrEqual(node, key);
-            //checks to see if it is the correct value
-            
-            if (node.getNumItems() == indexElement) {
-                //reassign node to child
-                node = node.getChild(indexElement);
-            }   
-            else if (node.getItem(indexElement).key() == key) {
-                return (node.getItem(indexElement));
-            } 
-            
-            else if (node.getNumItems() > indexElement) {
-                node = node.getChild(indexElement);
-            }
-            
+        nodeIndexPair pair = search(key);
+        
+        if(pair.exactMatch){
+            return (pair.node.getItem(pair.index));
         }
-        //return null if unsuccessful
+        
         return null;
     }
     
-    protected TFNode search(Object key){
+    /**
+     * Searches for a key within the tree
+     * 
+     * @param key the key to search for
+     * @return the node that is holding an item with that key
+     */
+    protected nodeIndexPair search(Object key){
         //holds the return data of FFGTE
+        nodeIndexPair pair = new nodeIndexPair();
         int indexElement;
         TFNode node;
         //start at root node
         node = root();
       
-         //FindFirstGreaterThanOrEqual
+        //Always check if the node is not null so that no problems arise.
         while (node != null) {
-            //assigns value from FFGTE
+            //find the first greater than or equal
             indexElement = findFirstGreaterThanOrEqual(node, key);
             
-            //moves to next node when key not found in the node
-            if (node.getNumItems() == indexElement) {
-                //reassign node to child
-                node = node.getChild(indexElement);
+            //if all elements in the current node are less, we need to go down the furthest right child
+            if (indexElement == -1) {
+                
+                //if we don't have a furthest right child then the item should be in this node's furthest right spot
+                if(node.getChild(node.getNumItems()) == null){
+                    pair.node = node;
+                    pair.index = node.getNumItems();
+                    return pair;
+                }
+                else{
+                    //if we do have a furthest right child go down the furthest right child
+                    node = node.getChild(node.getNumItems());
+                }  
             } 
             
-            //checks to see if it is the correct value
+            //see if the element from FFGTOE is the item we want
+            //if it is, then we simply return the node and index.
             else if (node.getItem(indexElement).key() == key) {
-                return (node);
+                pair.index = indexElement;
+                pair.node = node;
+                pair.exactMatch = true;
+                return pair;
             } 
             
-            else if (node.getNumItems() > indexElement) {
-                node = node.getChild(indexElement);
-            }
-              
+            //if not, then we need to go down that child
+            else {
+                
+                //if we don't have a child in that spot then the item should be in this spot
+                if(node.getChild(indexElement) == null){
+                    pair.node = node;
+                    pair.index = indexElement;
+                    return pair;
+                }
+                else{
+                    //if we do have a furthest right child go down the furthest right child
+                    node = node.getChild(indexElement);
+                } 
+            }    
         }
-        //return null if unsuccessful
+        //return null if all else fails
         return null;
     }
 
@@ -111,6 +138,7 @@ public class TwoFourTree
     public void insertElement(Object key, Object element) {
     	//creates new item based on input
         Item newItem = new Item (key, element);
+        
         //adds a node to insert the item into if the tree doesn't have nodes yet
         if (isEmpty()) {
             treeRoot = new TFNode();
@@ -118,11 +146,27 @@ public class TwoFourTree
             treeRoot.setChild(0, null);
             treeRoot.setParent(null);
         }
+        
+        //if the tree already has nodes we need to find where the new element should go
         else {
-            TFNode node; 
-            //find proper location to insert item
-            node = (TFNode) findElement(key);
-            if (node != null) {
+            nodeIndexPair pair;
+            //find the place where the element should be inserted
+            pair = search(key);
+            
+            //if that key already exists in the tree put it at the inorder successor.
+            if(pair.exactMatch){
+                pair = inorderSuccessor(pair);
+            }
+            
+            //perform a shifting insert
+            pair.node.insertItem(pair.index, newItem);
+            
+            printTree(root(), 0);
+            
+            checkOverflow(pair.node);
+            
+            /*
+            if (pair.node != null) {
                 int index = 0;
                 //finds index to place in node
                 while (treeComp.isLessThan(key, node.getItem(index).key())) {
@@ -132,8 +176,10 @@ public class TwoFourTree
                 node.insertItem(index, newItem);
                 node.setChild(index, null);
                 checkOverflow(node);  
-            }
+            }*/
         }
+        
+        //printTree(root(), 0);
         
         size++;
         
@@ -151,13 +197,30 @@ public class TwoFourTree
     @Override
     public Object removeElement(Object key) throws ElementNotFoundException {
         
-        TFNode node = search(key);
+        nodeIndexPair pair = search(key);
         Item out;
          
         if (findElement(key) == null) {
             throw new ElementNotFoundException ("No such element exists.");
         }
         else {
+            
+            //if we are not a leaf
+            if(pair.node.getChild(0) != null){
+                //replace with inorder successor
+                pair.node.addItem(pair.index, (inorderSuccessor(pair)).node.replaceItem(0, pair.node.getItem(pair.index)));               
+            }
+            
+            //do a shifting remove on new inorder successor
+            pair = inorderSuccessor(pair);
+            pair.node.removeItem(0);
+            
+            size--;
+            //check for underflow
+            checkUnderflow(pair.node);
+            
+            
+            /*
             //vairable that says whether node is a leaf.
             boolean isLeaf = true;
             
@@ -209,7 +272,7 @@ public class TwoFourTree
                 size--;
                 checkTree();
                 return (out);
-            }
+            }*/
 
      
             //ALGORITHM
@@ -221,37 +284,37 @@ public class TwoFourTree
             //check if underflow
 
         }
+        return null;
     }
     
     /**
      * 
-     * @param node the node to find the inorderSucessor for
-     * @param itm the item that needs the inorderSucessor
-     * @return the inorderSuccessor node, if one exists
+     * @param pair the nodeIndex pair
+     * @return the inorderSuccessor node and index, if one exists
      */
-    protected Item inorderSuccessor(TFNode node, Item itm){
+    protected nodeIndexPair inorderSuccessor(nodeIndexPair pair){
         
-        Item returnItem;
-        int arrayIndex = 0;
-        
-        //find index that the item is at
-        for(; arrayIndex < node.getNumItems(); arrayIndex++){
-            if(itm == node.getItem(arrayIndex)){
-                break;
-            }
-        }
+        nodeIndexPair returnPair = new nodeIndexPair();
+        TFNode returnNode;
         
         //find the inorder successer node
-        //get the right child
-        TFNode returnNode = node.getChild(arrayIndex+1);
-        //get the furthest left child
-        while(true){
-            if(returnNode.getChild(0) == null){
-                break;
-            }
-            returnNode = returnNode.getChild(0);
+        //if we don't have a right child then put the duplicate right after our position
+        if(pair.node.getChild(pair.index) == null){
+            returnPair.node = pair.node;
+            returnPair.index = pair.index + 1;
         }
-        return returnNode.getItem(0);
+        else{
+            //get the right child
+            returnNode = pair.node.getChild(pair.index);
+            
+            //get the furthest left child
+            while(returnNode.getChild(0) != null){
+                returnNode = returnNode.getChild(0);
+            }
+            returnPair.node = returnNode;
+            returnPair.index = 0;
+        }
+        return returnPair;
     }
     
     /**
@@ -262,23 +325,21 @@ public class TwoFourTree
      * for where the key should go. Called for a node to see if the key is in a given node
      * @param node the node to search
      * @param key the item to search for in given node 
-     * @return index in the array relating to the first greater than or equal
+     * @return index in the array relating to the first greater than or equal. If -1 then all items are less than current item
      */
     protected int findFirstGreaterThanOrEqual(TFNode node, Object key){
         
         int numOfItems = node.getNumItems();
-        //set the return value to the last slot because if we don't find
-        //a first greater than or equal we know we need to put it at the end
-        int returnVal = numOfItems;
         
         for(int i = 0; i < numOfItems; i++){
             //if the current element's key is greater than or equal to the search key 
             if(treeComp.isGreaterThanOrEqualTo(node.getItem(i).key(), key)){
                 //return the index
-                returnVal = i;
+                return i;
             }
-        }       
-        return returnVal;
+        } 
+        //else if all items are smaller return -1
+        return -1;
     }
     
     /**
@@ -351,13 +412,14 @@ public class TwoFourTree
         //check overflow on parent
         //Don't shift when u remove item from node
         
-        Item i2 = node.deleteItem(2);
-        Item i3 = node.deleteItem(3);
         int wcit = whatChildIsThis(node);
         TFNode newNode = new TFNode();
-        newNode.addItem(0, i3);
+        
         
         if(node != root()){
+            Item i2 = node.deleteItem(2);
+            Item i3 = node.deleteItem(3);
+            newNode.addItem(0, i3);
             TFNode parent = node.getParent();
             newNode.setParent(parent);
             parent.insertItem(wcit, i2);
@@ -543,6 +605,7 @@ public class TwoFourTree
 
         Integer myInt1 = new Integer(47);
         myTree.insertElement(myInt1, myInt1);
+        
         Integer myInt2 = new Integer(83);
         myTree.insertElement(myInt2, myInt2);
         Integer myInt3 = new Integer(22);
