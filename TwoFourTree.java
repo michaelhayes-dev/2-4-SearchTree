@@ -160,26 +160,10 @@ public class TwoFourTree
             
             //perform a shifting insert
             pair.node.insertItem(pair.index, newItem);
-            
-            printTree(root(), 0);
-            
+                       
             checkOverflow(pair.node);
             
-            /*
-            if (pair.node != null) {
-                int index = 0;
-                //finds index to place in node
-                while (treeComp.isLessThan(key, node.getItem(index).key())) {
-                    index++;
-                }
-                //add a child node and insert child
-                node.insertItem(index, newItem);
-                node.setChild(index, null);
-                checkOverflow(node);  
-            }*/
         }
-        
-        //printTree(root(), 0);
         
         size++;
         
@@ -411,24 +395,34 @@ public class TwoFourTree
         //hook up kids
         //check overflow on parent
         //Don't shift when u remove item from node
-        
-        int wcit = whatChildIsThis(node);
-        TFNode newNode = new TFNode();
-        
-        
+
         if(node != root()){
-            Item i2 = node.deleteItem(2);
-            Item i3 = node.deleteItem(3);
-            newNode.addItem(0, i3);
+            //determine what child it is
+            int wcit = whatChildIsThis(node);
             TFNode parent = node.getParent();
+            TFNode newNode = new TFNode();
+            
+            Item i3 = node.deleteItem(3);
+            Item i2 = node.deleteItem(2);
+            newNode.addItem(0, i3);
+            
             newNode.setParent(parent);
             parent.insertItem(wcit, i2);
+            parent.setChild(wcit+1, newNode);
             
             //hook up the new children
             newNode.setChild(0, node.getChild(3));
             newNode.setChild(1, node.getChild(4));
             node.setChild(3, null);
             node.setChild(4, null);
+            
+            //hook up children to parents
+            if(newNode.getChild(0) != null){
+                newNode.getChild(0).setParent(newNode);
+            }
+            if(newNode.getChild(1) != null){
+                newNode.getChild(1).setParent(newNode);
+            }
             
             //make sure the tree is correct 
             checkTree();
@@ -438,17 +432,35 @@ public class TwoFourTree
             //the node that overflows is the root
             //we will need to grow the root
             TFNode newRoot = new TFNode();
-            Item newRootItem = node.deleteItem(2);
+            Item newRootItem = node.getItem(2);
             newRoot.insertItem(0, newRootItem);
             node.setParent(newRoot);
             setRoot(newRoot);
             
             TFNode newChild = new TFNode();
+            newChild.insertItem(0, node.deleteItem(3));
             newChild.setParent(newRoot);
-            
-            //hook up the children
+            node.deleteItem(2);
+                        
+            //hook up the parents to children
             newRoot.setChild(0, node);
             newRoot.setChild(1, newChild);
+            newChild.setChild(0, node.getChild(3));
+            newChild.setChild(1, node.getChild(4));
+            
+            //null out old children
+            node.setChild(3, null);
+            node.setChild(4, null);
+            
+            //hook up the children to parents
+            if(newChild.getChild(0) != null){
+                newChild.getChild(0).setParent(newChild);
+            }
+            if(newChild.getChild(1) != null){
+                newChild.getChild(1).setParent(newChild);
+            }
+                        
+            checkTree();
         }      
     }
     
