@@ -652,7 +652,7 @@ public class TwoFourTree
         myTree = new TwoFourTree(myComp);
         final int TEST_SIZE = 10000;
         
-        Random r = new Random(9);
+        Random r = new Random();
         int[] a = new int[TEST_SIZE];
 
         //insert a bunch of random numbers
