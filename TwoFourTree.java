@@ -1,6 +1,7 @@
 package termproject;
 
 //for random number generator
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -183,7 +184,8 @@ public class TwoFourTree
     public Object removeElement(Object key) throws ElementNotFoundException {
         
         nodeIndexPair pair = search(key);
-         
+        Item item = null; 
+        
         if (findElement(key) == null) {
             throw new ElementNotFoundException ("No such element exists.");
         }
@@ -200,14 +202,14 @@ public class TwoFourTree
             
             //do a shifting remove on new inorder successor
             pair = inorderSuccessor(pair);
-            pair.node.removeItem(pair.index);
+            item = pair.node.removeItem(pair.index);
             
             size--;
             //check for underflow
             checkTree();
             checkUnderflow(pair.node);
         }
-        return null;
+        return item.element();
     }
     
     /**
@@ -498,7 +500,7 @@ public class TwoFourTree
         
         //clean up the left node
         leftSib.setChild(leftSib.getNumItems(), null);
-        leftSib.removeItem(leftSib.getNumItems()-1);
+        leftSib.deleteItem(leftSib.getNumItems()-1);
               
         checkTree();
     }
@@ -548,8 +550,8 @@ public class TwoFourTree
             }
   
             //remove the parent item
-            parent.setChild(wcit, null);
-            parent.deleteItem(wcit-1);
+            parent.setChild(wcit, leftSib);
+            parent.removeItem(wcit-1);
 
             checkTree();
             checkUnderflow(parent); 
@@ -573,6 +575,9 @@ public class TwoFourTree
                 rightSib.getChild(0).setParent(rightSib);
             }
   
+            //remove the parent item
+            //parent.setChild(wcit, null);
+            //parent.deleteItem(wcit);
             //remove the parent item
             parent.removeItem(wcit);
 
@@ -645,7 +650,7 @@ public class TwoFourTree
         //System.out.println("done");
 
         myTree = new TwoFourTree(myComp);
-        final int TEST_SIZE = 25;
+        final int TEST_SIZE = 10000;
         
         Random r = new Random(9);
         int[] a = new int[TEST_SIZE];
@@ -661,11 +666,21 @@ public class TwoFourTree
         myTree.printAllElements();
         
         System.out.println("removing");
-        for (int i = 0; i < 9; i++) {
-            myTree.removeElement(a[i]);
-            myTree.printAllElements();
-            myTree.checkTree();            
+        for (int i = 0; i < TEST_SIZE; i++) {
+            if(i > TEST_SIZE - 25){
+                System.out.println("removing " + a[i]);
+            }
+            
+            int out = (Integer) myTree.removeElement(a[i]);
+            if(out != a[i]){
+                throw new RuntimeException();
+            }
+            
+            if(i > TEST_SIZE - 25){
+                myTree.printAllElements();
+            }
         }
+        
         //myTree.printAllElements();
         System.out.println("done");
         
