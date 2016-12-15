@@ -202,6 +202,7 @@ public class TwoFourTree
             
             size--;
             //check for underflow
+            checkTree();
             checkUnderflow(pair.node);
         }
         return null;
@@ -454,10 +455,10 @@ public class TwoFourTree
            TFNode rightSib = rightSib(node);
            
            //perform the underflow checks
-           if((leftSib != null) && (leftSib.getNumItems() == 2)){
+           if((leftSib != null) && (leftSib.getNumItems() >= 2)){
                leftTransfer(node);
            }
-           else if((rightSib != null) && (rightSib.getNumItems() == 2)){
+           else if((rightSib != null) && (rightSib.getNumItems() >= 2)){
                rightTransfer(node);
            }
            else if(leftSib != null){
@@ -466,11 +467,11 @@ public class TwoFourTree
            else {
                rightFusion(node);
            }
+           
         }
         else{
             //Special case for underflow at root
-            //tree is now empty so make it null
-            node = null;
+            setRoot(root().getChild(0));
         } 
     }
     
