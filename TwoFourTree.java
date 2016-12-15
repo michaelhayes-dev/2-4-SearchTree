@@ -71,7 +71,7 @@ public class TwoFourTree
      * Searches for a key within the tree
      * 
      * @param key the key to search for
-     * @return the node that is holding an item with that key
+     * @return the nodeIndexPair containing data from the search
      */
     protected nodeIndexPair search(Object key){
         //holds the return data of FFGTE
@@ -103,7 +103,7 @@ public class TwoFourTree
             
             //see if the element from FFGTOE is the item we want
             //if it is, then we simply return the node and index.
-            else if (node.getItem(indexElement).key() == key) {
+            else if (treeComp.isEqual(node.getItem(indexElement).key(), key)) {
                 pair.index = indexElement;
                 pair.node = node;
                 pair.exactMatch = true;
@@ -112,7 +112,6 @@ public class TwoFourTree
             
             //if not, then we need to go down that child
             else {
-                
                 //if we don't have a child in that spot then the item should be in this spot
                 if(node.getChild(indexElement) == null){
                     pair.node = node;
@@ -120,7 +119,7 @@ public class TwoFourTree
                     return pair;
                 }
                 else{
-                    //if we do have a furthest right child go down the furthest right child
+                    //if we do have a child there go down the that child
                     node = node.getChild(indexElement);
                 } 
             }    
@@ -161,8 +160,7 @@ public class TwoFourTree
             //perform a shifting insert
             pair.node.insertItem(pair.index, newItem);
                        
-            checkOverflow(pair.node);
-            
+            checkOverflow(pair.node);     
         }
         
         size++;
@@ -192,81 +190,19 @@ public class TwoFourTree
             //if we are not a leaf
             if(pair.node.getChild(0) != null){
                 //replace with inorder successor
-                pair.node.addItem(pair.index, (inorderSuccessor(pair)).node.replaceItem(0, pair.node.getItem(pair.index)));               
+                nodeIndexPair inOrdSuc = inorderSuccessor(pair);
+                Item tempItem = inOrdSuc.node.getItem(inOrdSuc.index);
+                inOrdSuc.node.replaceItem(inOrdSuc.index, pair.node.getItem(pair.index));
+                pair.node.replaceItem(pair.index, tempItem);
             }
             
             //do a shifting remove on new inorder successor
             pair = inorderSuccessor(pair);
-            pair.node.removeItem(0);
+            pair.node.removeItem(pair.index);
             
             size--;
             //check for underflow
             checkUnderflow(pair.node);
-            
-            
-            /*
-            //vairable that says whether node is a leaf.
-            boolean isLeaf = true;
-            
-            //find proper location to insert item
-            int index = 0;
-            //finds index to place in node
-            while (treeComp.isLessThan(key, node.getItem(index).key())) {
-                index++;
-            }
-            
-            //finds our whether node is a leaf and assigns the isLeaf variable
-            for (int i = 0; i < node.getNumItems(); i++) {
-                if (node.getChild(i) != null) {
-                    isLeaf = false;
-                    break;
-                }
-            }
-            
-            //remove the item, leaf condition
-            if (isLeaf) { 
-                out = node.removeItem(index);
-                checkUnderflow(node);
-                size--;
-                checkTree();
-                
-                //Always check to make sure all pointers are hooked up correctly
-                checkTree();
-             
-                return (out);
-            }
-            
-            else {
-                //node where the inorder successor lives
-                TFNode inOrder;
-                //index of the inorder successor
-                int inOrderIndex = 0;
-                //assigns item to the inorder successor
-                Item item = inorderSuccessor(node, node.getItem(index));
-                //replaces the item to be removed with inorder successor  
-                out = node.replaceItem(index, item);
-                //finds the location of the inorder successor and removes it.
-                inOrder = search(item.key());
-                while (treeComp.isLessThan(item.key(), inOrder.getItem(inOrderIndex).key())) {
-                    inOrderIndex++;
-                }
-                inOrder.removeItem(inOrderIndex);
-                
-                checkUnderflow(node);
-                size--;
-                checkTree();
-                return (out);
-            }*/
-
-     
-            //ALGORITHM
-            //find node to delete
-            //am i a leaf?
-            //if so remove item from the leaf and check underflow
-            //if not, replace me with inorder successor
-            //perform a shifting delete to remove inorder successor
-            //check if underflow
-
         }
         return null;
     }
@@ -285,11 +221,11 @@ public class TwoFourTree
         //if we don't have a right child then put the duplicate right after our position
         if(pair.node.getChild(pair.index) == null){
             returnPair.node = pair.node;
-            returnPair.index = pair.index + 1;
+            returnPair.index = pair.index;
         }
         else{
             //get the right child
-            returnNode = pair.node.getChild(pair.index);
+            returnNode = pair.node.getChild(pair.index+1);
             
             //get the furthest left child
             while(returnNode.getChild(0) != null){
@@ -532,8 +468,9 @@ public class TwoFourTree
            }
         }
         else{
-            //TODO:
             //Special case for underflow at root
+            //tree is now empty so make it null
+            node = null;
         } 
     }
     
@@ -546,14 +483,14 @@ public class TwoFourTree
         TFNode parent = node.getParent();
         
         //move parent item down
-        node.insertItem(0, parent.deleteItem(whatChildIsThis(leftSib)));
+        node.insertItem(0, parent.getItem(whatChildIsThis(leftSib)));
         //move left sib item up
-        parent.insertItem(whatChildIsThis(leftSib), leftSib.deleteItem(1));
+        parent.replaceItem(whatChildIsThis(leftSib), leftSib.removeItem(1));
         
         //hook up children
         node.setChild(0, leftSib.getChild(2));
         leftSib.setChild(2, null);
-        
+              
         checkTree();
     }
     
@@ -566,14 +503,12 @@ public class TwoFourTree
         TFNode parent = node.getParent();
         
         //move parent item down
-        node.insertItem(0, parent.deleteItem(whatChildIsThis(rightSib)-1));
-        //move right sib item up
-        //CHECK THIS****
-        parent.insertItem(whatChildIsThis(rightSib)-1, rightSib.deleteItem(0));
+        node.insertItem(0, parent.getItem(whatChildIsThis(node)));
+        //move left sib item up
+        parent.replaceItem(whatChildIsThis(node), rightSib.removeItem(0));
         
         //hook up children
-        //CHECK THIS****
-        node.setChild(0, rightSib.getChild(0));
+        node.setChild(1, rightSib.getChild(0));
         rightSib.setChild(0, null);
         
         checkTree();
@@ -584,14 +519,41 @@ public class TwoFourTree
      * @param node the node that the left fusion is performed on
      */
     protected void leftFusion(TFNode node){
-        Item item = node.getItem(0);
-        TFNode child = node.getChild(0);
-        //location in the child where the item goes
-        int location = child.getNumItems();
-        child.insertItem(location - 1 , item);
-        child.setChild(location, null);
-        node.removeItem(0);
-        checkUnderflow(node);
+        
+        TFNode parent = node.getParent();
+        TFNode leftSib = leftSib(node);
+        int wcit = whatChildIsThis(node);
+        
+        node.insertItem(0, parent.getItem(wcit-1));
+        node.insertItem(0, leftSib.getItem(leftSib.getNumItems()-1));
+        
+        //connect the parent to the children
+        node.setChild(0, leftSib.getChild(leftSib.getNumItems()-1));
+        node.setChild(1, leftSib.getChild(leftSib.getNumItems()));
+        
+        //null the old children out
+        leftSib.setChild(leftSib.getNumItems()-1, null);
+        leftSib.setChild(leftSib.getNumItems(), null);
+        
+        //connect the children to the parent
+        if(node.getChild(0) != null){
+            node.getChild(0).setParent(node);
+        }
+        if(node.getChild(1) != null){
+            node.getChild(1).setParent(node);
+        }
+        
+        //null out the item
+        leftSib.removeItem(leftSib.getNumItems()-1);
+        
+        //copy over the child
+        parent.setChild(wcit-2, parent.getChild(wcit-1));
+        
+        //remove the item from the parent node
+        parent.removeItem(wcit-1);
+        
+        checkTree();
+        checkUnderflow(parent);
     }
     
     /**
@@ -599,16 +561,46 @@ public class TwoFourTree
      * @param node the node that the right fusion is performed on
      */
     protected void rightFusion(TFNode node){
-        //location of the rightmost item
-        int rightLocation = node.getNumItems();
-        Item item = node.getItem(rightLocation);
-        TFNode child = node.getChild(rightLocation);
-        //location in the child where the item goes
-        int location = child.getNumItems();
-        child.insertItem(location , item);
-        child.setChild(location, null);
-        node.removeItem(rightLocation);
-        checkUnderflow(node);
+        if(node != root()){
+            TFNode parent = node.getParent();
+            TFNode rightSib = rightSib(node);
+            int wcit = whatChildIsThis(node);
+
+            node.insertItem(0, rightSib.getItem(0));
+            node.insertItem(0, parent.getItem(wcit));  
+
+            //connect the parent to the children
+            node.setChild(1, rightSib.getChild(0));
+            node.setChild(2, rightSib.getChild(1));
+
+            //null the old children out
+            rightSib.setChild(0, null);
+            rightSib.setChild(1, null);
+            
+            //connect the children to the parent
+            if(node.getChild(1) != null){
+                node.getChild(1).setParent(node);
+            }
+            if(node.getChild(2) != null){
+                node.getChild(2).setParent(node);
+            }
+
+            //null out the item
+            rightSib.removeItem(0);
+
+            //copy over the child
+            parent.setChild(wcit+1, parent.getChild(wcit));
+
+            //remove the item from the parent node
+            parent.removeItem(wcit);
+
+            checkTree();
+            checkUnderflow(parent); 
+        }
+        else{
+            //If it is the root
+        }
+        
     }
 
     public static void main(String[] args) {
@@ -665,7 +657,7 @@ public class TwoFourTree
         Integer myInt17 = new Integer(94);
         myTree.insertElement(myInt17, myInt17);
 
-        Integer myInt18 = new Integer(35);
+        Integer myInt18 = new Integer(97);
         myTree.insertElement(myInt18, myInt18);
 
         Integer myInt19 = new Integer(51);
@@ -675,20 +667,21 @@ public class TwoFourTree
         System.out.println("done");
 
         myTree = new TwoFourTree(myComp);
-        final int TEST_SIZE = 10000;
+        final int TEST_SIZE = 15;
 
 
         for (int i = 0; i < TEST_SIZE; i++) {
             myTree.insertElement(new Integer(i), new Integer(i));
-            //          myTree.printAllElements();
-            //         myTree.checkTree();
+                    //myTree.printAllElements();
+                    myTree.checkTree();
         }
         System.out.println("removing");
         for (int i = 0; i < TEST_SIZE; i++) {
-            int out = (Integer) myTree.removeElement(new Integer(i));
-            if (out != i) {
-                throw new TwoFourTreeException("main: wrong element removed");
-            }
+            myTree.removeElement(i);
+            //int out = (Integer) myTree.removeElement(new Integer(i));
+            //if (out != i) {
+               // throw new TwoFourTreeException("main: wrong element removed");
+            //}
             if (i > TEST_SIZE - 15) {
                 myTree.printAllElements();
             }
