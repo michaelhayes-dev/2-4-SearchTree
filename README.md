@@ -1,4 +1,4 @@
-# JavaTermProject
+# 2-4 Multi-Way Search Tree
 - 2016 Term Project for Data Structures in Java
 - Implementation for a (2, 4) Multi-Way Search Tree using Java
 
