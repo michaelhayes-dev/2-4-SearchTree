@@ -1,6 +1,6 @@
 # JavaTermProject
-2016 Term Project for Data Structures in Java
-Implementation for a (2, 4) Multi-Way Search Tree using Java
+- 2016 Term Project for Data Structures in Java
+- Implementation for a (2, 4) Multi-Way Search Tree using Java
 
 # Features
 - Provides inserts, removes, and finds for the Search Tree per specifications
